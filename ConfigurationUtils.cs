@@ -8,5 +8,9 @@ namespace ECC_sdk_windows
 {
     class ConfigurationUtils
     {
+        public ConfigurationUtils()
+        {
+            string s = Properties.Resources.ECCIoT_Server_Address;
+        }
     }
 }

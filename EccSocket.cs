@@ -14,13 +14,14 @@ namespace ECC_sdk_windows
     public class EccSocket
     {
         //Socket
-        private Socket socket;   
+        public Socket Socket { get;private set; }   
         private IPEndPoint ipep;
         private int maxCacheSize = 2048;
         //回调接口
         private IEccListener eccListener;
         //字符编码
         private Encoding encoding = Encoding.UTF8;
+        public Encoding Encoding { set { encoding = value; } }
 
         /// <summary>
         /// 
@@ -28,17 +29,16 @@ namespace ECC_sdk_windows
         /// <param name="ipep">网络终结点</param>
         /// <param name="eccListener"></param>
         /// <param name="encoding"></param>
-        public EccSocket(IPEndPoint ipep,IEccListener eccListener,Encoding encoding)
+        public EccSocket(IPEndPoint ipep,IEccListener eccListener)
         {
             this.ipep = ipep;
             this.eccListener = eccListener;
-            this.encoding = encoding;
         }
 
         /// <summary>
         /// 建立连接
         /// </summary>
-        public void Connect()
+        public void Connect(IEccListener listener)
         {
             //端口及IP  
             //IPEndPoint ipe = new IPEndPoint(IPAddress.Parse("127.0.0.1"), 6065);
@@ -50,7 +50,7 @@ namespace ECC_sdk_windows
                 //结束挂起的异步连接请求
                 client.EndConnect(asyncResult);
                 //连接完成回调
-                eccListener.Ecc_Connected();
+                eccListener.Ecc_Connected(listener);
                 //接受消息  
                 Recive();
             }, null);
@@ -60,28 +60,28 @@ namespace ECC_sdk_windows
         /// 发送数据
         /// </summary>
         /// <param name="message">消息字符串</param>
-        public void Send(string message)
+        public void Send(IEccListener listener, string message)
         {
-            if (socket == null || message == string.Empty) return;
+            if (Socket == null || message == string.Empty) return;
             //编码  
             byte[] data = encoding.GetBytes(message);
             try
             {
                 //异步发送数据
-                socket.BeginSend(data, 0, data.Length, SocketFlags.None, asyncResult =>
+                Socket.BeginSend(data, 0, data.Length, SocketFlags.None, asyncResult =>
                 {
                     //完成发送消息  
-                    int length = socket.EndSend(asyncResult);
+                    int length = Socket.EndSend(asyncResult);
                     //消息发送成功
-                    eccListener.Ecc_Sent(message, true);
+                    eccListener.Ecc_Sent(listener,message, true);
                 }, null);
             }
             catch (SocketException ex)
             {
                 //消息发送失败
-                eccListener.Ecc_Sent(message, false);
+                eccListener.Ecc_Sent(listener,message, false);
                 //异常回调
-                eccListener.Ecc_OnException(ex);
+                eccListener.Ecc_OnException(listener,ex);
             }
         }
 
@@ -95,10 +95,10 @@ namespace ECC_sdk_windows
             try
             {
                 //开始接收数据  
-                socket.BeginReceive(data, 0, data.Length, SocketFlags.None,
+                Socket.BeginReceive(data, 0, data.Length, SocketFlags.None,
                 asyncResult =>
                 {
-                    int length = socket.EndReceive(asyncResult);
+                    int length = Socket.EndReceive(asyncResult);
                     //消息接收回调
                     eccListener.Ecc_Receive(encoding.GetString(data), length);
                     //重启异步接收数据
@@ -107,7 +107,7 @@ namespace ECC_sdk_windows
             }
             catch (SocketException ex)
             {
-                eccListener.Ecc_OnException(ex);
+                eccListener.Ecc_OnReceiveException(ex);
             }
         }
     }
