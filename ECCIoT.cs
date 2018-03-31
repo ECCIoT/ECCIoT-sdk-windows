@@ -11,7 +11,7 @@ namespace ECC_sdk_windows
     /// <summary>
     /// 
     /// </summary>
-    public class ECCIoT : IEccListener
+    public class ECCIoT : IEccReceiptListener, IEccDataReceiveListener, IEccExceptionListener
     {
         //======================================================================================
         // 定义一个静态变量来保存类的实例
@@ -40,82 +40,101 @@ namespace ECC_sdk_windows
 
         /*ECC通信*/
         //服务端地址
-        private IPAddress ecc_server_address = IPAddress.Parse(Properties.Resources.ECCIoT_Server_Address);
+        private static IPAddress ecc_server_address = IPAddress.Parse(Properties.Resources.ECCIoT_Server_Address);
         //服务端端口
-        private int ecc_server_port = int.Parse(Properties.Resources.ECCIoT_Server_Port);
+        private static int ecc_server_port = int.Parse(Properties.Resources.ECCIoT_Server_Port);
         //通信工具类
         private EccSocket eccSocket;
 
         /*监听器集合*/
-        private List<IEccListener> lstListener = new List<IEccListener>();
+        private List<IEccReceiptListener> lstListener = new List<IEccReceiptListener>();
 
+        private ECCIoT(){}
 
-        private ECCIoT(){
-            IPEndPoint ipep = new IPEndPoint(ecc_server_address, ecc_server_port);
-            eccSocket = new EccSocket(ipep, this);
-        }
-
-        public static void Connect(IEccListener listener)
+        /// <summary>
+        /// 连接服务器
+        /// </summary>
+        /// <param name="listener"></param>
+        public static void Connect(IEccReceiptListener listener)
         {
+            //初始化EccSocket
+            if (GetInstance().eccSocket == null)
+            {
+                IPEndPoint ipep = new IPEndPoint(ecc_server_address, ecc_server_port);
+                GetInstance().eccSocket = new EccSocket(ipep);
+            }
+
+            //连接服务器
             GetInstance().eccSocket.Connect(listener);
         }
 
-        public static void Send(IEccListener listener,string message)
+        /// <summary>
+        /// 重新连接服务器
+        /// </summary>
+        /// <param name="listener"></param>
+        public static void Reconnect(IEccReceiptListener listener)
         {
-            /* 不必这么写
-            if (GetInstance().eccSocket.Socket==null || !GetInstance().eccSocket.Socket.Connected)
+            GetInstance().eccSocket.Dispose();
+            GetInstance().eccSocket = null;
+            Connect(listener);
+        }
+
+        /// <summary>
+        /// 向服务器发送消息
+        /// </summary>
+        /// <param name="listener"></param>
+        /// <param name="message"></param>
+        public static void Send(IEccReceiptListener listener,string message)
+        {
+            if (GetInstance().eccSocket==null)
             {
                 //抛出异常
                 return;
             }
-            */
+            if (!GetInstance().eccSocket.Socket.Connected)
+            {
+                //由于采用异步连接，可能会处于连接中的状态
+                return;
+            }
             GetInstance().eccSocket.Send(listener, message);
         }
 
 
-        public void Ecc_Connected(IEccListener listener)
+        /*操作回执回调接口*/
+        void IEccReceiptListener.Ecc_Connection(IEccReceiptListener listener, bool isSucceed)
         {
-            try
-            {
-                listener.Ecc_Connected(listener);
-            }
-            catch(NullReferenceException ex)
-            {
-                foreach (IEccListener el in lstListener)    //使用迭代器可能会导致侦听接口从List中移除时发生异常，应使用for循环控制
-                {
-                    el.Ecc_Connected(null);
-                }
-            }
+            throw new NotImplementedException();
         }
 
-        public void Ecc_Sent(IEccListener listener, string msg, bool isSucceed)
+        void IEccReceiptListener.Ecc_Sent(IEccReceiptListener listener, string msg, bool isSucceed)
         {
             try
             {
-                listener.Ecc_Sent(listener,msg,isSucceed);
+                listener.Ecc_Sent(listener, msg, isSucceed);
             }
             catch (NullReferenceException ex)
             {
-                foreach (IEccListener el in lstListener)
-                {
-                    el.Ecc_Sent(null, msg, isSucceed);
-                }
+
             }
         }
 
-        public void Ecc_OnException(IEccListener listener, Exception e)
+        /*数据接收回调接口*/
+        void IEccDataReceiveListener.Ecc_Received(string msg, int len)
         {
+            throw new NotImplementedException();
         }
 
-        public void Ecc_Receive(string msg, int len)
+        /*异常错误回调接口*/
+        void IEccExceptionListener.Ecc_BreakOff(Exception e)
         {
-            //2018年3月30日23:47:54
-            //我觉得接收的回调函数应该有一个单独的侦听接口
-        }
+            try
+            {
+                
+            }
+            catch (NullReferenceException ex)
+            {
 
-        public void Ecc_OnReceiveException(SocketException ex)
-        {
-            
+            }
         }
     }
 }

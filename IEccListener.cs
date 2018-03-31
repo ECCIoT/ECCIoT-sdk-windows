@@ -8,34 +8,48 @@ using System.Threading.Tasks;
 namespace ECC_sdk_windows
 {
     /// <summary>
-    /// ECCIoT-SDK事件侦听器接口
-    /// todo: 接口方法中的参数应该为事件对象，即：为其设计事件类
+    /// 操作回执回调接口
     /// </summary>
-    public interface IEccListener
+    public interface IEccReceiptListener
+    {
+        /// <summary>
+        /// 连接建立回调方法
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="isSucceed"></param>
+        void Ecc_Connection(IEccReceiptListener listener, Boolean isSucceed);
+
+        /// <summary>
+        /// 消息发送回调方法
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="msg"></param>
+        /// <param name="isSucceed"></param>
+        void Ecc_Sent(IEccReceiptListener listener, string msg,Boolean isSucceed);
+    }
+
+    /// <summary>
+    /// 数据接收回调接口
+    /// </summary>
+    public interface IEccDataReceiveListener
     {
         /// <summary>
         /// 
         /// </summary>
         /// <param name="msg"></param>
-        void Ecc_Receive(string msg, int len);
+        void Ecc_Received(string msg, int len);
+    }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        void Ecc_Connected(IEccListener sender);
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="msg"></param>
-        /// <param name="isSucceed"></param>
-        void Ecc_Sent(IEccListener sender, string msg,Boolean isSucceed);
-
+    /// <summary>
+    /// 异常错误回调接口
+    /// </summary>
+    public interface IEccExceptionListener
+    {
         /// <summary>
         /// 
         /// </summary>
         /// <param name="e"></param>
-        void Ecc_OnException(IEccListener sender, Exception e);
-        void Ecc_OnReceiveException(SocketException ex);
+        void Ecc_BreakOff(Exception e);
     }
+
 }
