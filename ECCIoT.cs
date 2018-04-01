@@ -6,10 +6,10 @@ using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ECC_sdk_windows
+namespace ECCIoT_sdk_windows
 {
     /// <summary>
-    /// 
+    /// ECCIoT SDK
     /// </summary>
     public class ECCIoT : IEccReceiptListener, IEccDataReceiveListener, IEccExceptionListener
     {
@@ -49,6 +49,10 @@ namespace ECC_sdk_windows
         /*回调接口*/
         public IEccDataReceiveListener EccDataReceiveListener { private get; set; }
         public IEccExceptionListener EccExceptionListener { private get; set; }
+
+        /*必要参数*/
+        public string API_Key { get; set; }
+        private string Token { get; set; }
 
         private ECCIoT(){}
 

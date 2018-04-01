@@ -6,7 +6,7 @@ using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ECC_sdk_windows
+namespace ECCIoT_sdk_windows
 {
     /// <summary>
     /// 异步通信的Socket客户端工具类

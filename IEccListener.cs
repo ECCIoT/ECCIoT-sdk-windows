@@ -5,7 +5,7 @@ using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ECC_sdk_windows
+namespace ECCIoT_sdk_windows
 {
     /// <summary>
     /// 操作回执回调接口
