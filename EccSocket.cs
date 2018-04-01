@@ -15,7 +15,7 @@ namespace ECC_sdk_windows
     public class EccSocket : IDisposable
     {
         //Socket
-        public Socket Socket { get;private set; }   
+        public Socket Socket { get; private set; }
         private IPEndPoint ipep;
         private int maxCacheSize = 2048;
         //回调接口
@@ -40,8 +40,6 @@ namespace ECC_sdk_windows
         /// </summary>
         public void Connect(IEccReceiptListener listener)
         {
-            //端口及IP  
-            //IPEndPoint ipe = new IPEndPoint(IPAddress.Parse("127.0.0.1"), 6065);
             //创建套接字  
             Socket client = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
 
@@ -53,16 +51,19 @@ namespace ECC_sdk_windows
                     //结束挂起的异步连接请求
                     client.EndConnect(asyncResult);
                     //连接完成回调
-                    EccReceiptListener.Ecc_Connection(listener,true);
+                    EccReceiptListener.Ecc_Connection(listener, true);
                     //接受消息  
                     Recive();
                 }, null);
             }
-            catch (SocketException ex) {
+            catch (SocketException ex)
+            {
                 //与服务器连接失败
-                EccReceiptListener.Ecc_Connection(listener,false);
+                EccReceiptListener.Ecc_Connection(listener, false);
+                //异常回调
+                EccExceptionListener.Ecc_BreakOff(ex);
             }
-            
+
         }
 
         /// <summary>
@@ -82,13 +83,13 @@ namespace ECC_sdk_windows
                     //完成发送消息  
                     int length = Socket.EndSend(asyncResult);
                     //消息发送成功
-                    EccReceiptListener.Ecc_Sent(listener,message, true);
+                    EccReceiptListener.Ecc_Sent(listener, message, true);
                 }, null);
             }
             catch (SocketException ex)
             {
                 //消息发送失败
-                EccReceiptListener.Ecc_Sent(listener,message, false);
+                EccReceiptListener.Ecc_Sent(listener, message, false);
                 //异常回调
                 EccExceptionListener.Ecc_BreakOff(ex);
             }
@@ -116,14 +117,28 @@ namespace ECC_sdk_windows
             }
             catch (SocketException ex)
             {
+                //异常回调
                 EccExceptionListener.Ecc_BreakOff(ex);
             }
         }
 
+        /// <summary>
+        /// 销毁对象
+        /// </summary>
         public void Dispose()
         {
             Socket.Close();
             Socket.Dispose();
+        }
+
+        /// <summary>
+        /// 销毁对象并执行回调
+        /// </summary>
+        /// <param name="listener"></param>
+        public void Dispose(IEccReceiptListener listener)
+        {
+            Dispose();
+            EccReceiptListener.Ecc_Closed(listener);
         }
     }
 }
