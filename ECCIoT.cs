@@ -46,8 +46,9 @@ namespace ECC_sdk_windows
         //通信工具类
         private EccSocket eccSocket;
 
-        /*监听器集合*/
-        private List<IEccReceiptListener> lstListener = new List<IEccReceiptListener>();
+        /*回调接口*/
+        public IEccDataReceiveListener EccDataReceiveListener { private get; set; }
+        public IEccExceptionListener EccExceptionListener { private get; set; }
 
         private ECCIoT(){}
 
@@ -74,8 +75,9 @@ namespace ECC_sdk_windows
         /// <param name="listener"></param>
         public static void Reconnect(IEccReceiptListener listener)
         {
-            GetInstance().eccSocket.Dispose();
-            GetInstance().eccSocket = null;
+            //关闭通信
+            Close(listener);
+            //建立连接
             Connect(listener);
         }
 
@@ -99,41 +101,48 @@ namespace ECC_sdk_windows
             GetInstance().eccSocket.Send(listener, message);
         }
 
+        /// <summary>
+        /// 关闭与服务器的通信
+        /// </summary>
+        /// <param name="listener"></param>
+        public static void Close(IEccReceiptListener listener)
+        {
+            //关闭并销毁Socket通信对象
+            GetInstance().eccSocket.Dispose(listener);
+            //EccSocket对象置空
+            GetInstance().eccSocket = null;
+        }
+
 
         /*操作回执回调接口*/
         void IEccReceiptListener.Ecc_Connection(IEccReceiptListener listener, bool isSucceed)
         {
-            throw new NotImplementedException();
+            listener.Ecc_Connection(listener, isSucceed);
         }
-
         void IEccReceiptListener.Ecc_Sent(IEccReceiptListener listener, string msg, bool isSucceed)
         {
-            try
-            {
-                listener.Ecc_Sent(listener, msg, isSucceed);
-            }
-            catch (NullReferenceException ex)
-            {
-
-            }
+            listener.Ecc_Sent(listener, msg, isSucceed);
+        }
+        void IEccReceiptListener.Ecc_Closed(IEccReceiptListener listener)
+        {
+            listener.Ecc_Closed(listener);
         }
 
         /*数据接收回调接口*/
         void IEccDataReceiveListener.Ecc_Received(string msg, int len)
         {
-            throw new NotImplementedException();
+            if (GetInstance().EccDataReceiveListener != null)
+            {
+                GetInstance().EccDataReceiveListener.Ecc_Received(msg,len);
+            }
         }
 
         /*异常错误回调接口*/
         void IEccExceptionListener.Ecc_BreakOff(Exception e)
         {
-            try
+            if (GetInstance().EccExceptionListener != null)
             {
-                
-            }
-            catch (NullReferenceException ex)
-            {
-
+                GetInstance().EccExceptionListener.Ecc_BreakOff(e);
             }
         }
     }
