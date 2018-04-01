@@ -20,9 +20,15 @@ namespace ECC_sdk_windows
         void Ecc_Connection(IEccReceiptListener listener, Boolean isSucceed);
 
         /// <summary>
+        /// 主动关闭通信的回调方法
+        /// </summary>
+        /// <param name="listener"></param>
+        void Ecc_Closed(IEccReceiptListener listener);
+
+        /// <summary>
         /// 消息发送回调方法
         /// </summary>
-        /// <param name="sender"></param>
+        /// <param name="listener"></param>
         /// <param name="msg"></param>
         /// <param name="isSucceed"></param>
         void Ecc_Sent(IEccReceiptListener listener, string msg,Boolean isSucceed);
