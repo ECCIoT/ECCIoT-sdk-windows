@@ -11,7 +11,7 @@ namespace ECCIoT_sdk_windows
     /// <summary>
     /// ECCIoT SDK
     /// </summary>
-    public class ECCIoT : IEccReceiptListener, IEccDataReceiveListener, IEccExceptionListener
+    public class ECCIoT : IEccReceiptListener,IEccDataReceiveListener, IEccExceptionListener
     {
         //======================================================================================
         // 定义一个静态变量来保存类的实例
@@ -40,15 +40,24 @@ namespace ECCIoT_sdk_windows
 
         /*ECC通信*/
         //服务端地址
-        private static IPAddress ecc_server_address = IPAddress.Parse(Properties.Resources.ECCIoT_Server_Address);
+        private static IPAddress ecc_server_address = IPAddress.Parse(ECC_sdk_windows.Properties.Resources.ECCIoT_Server_Address);
         //服务端端口
-        private static int ecc_server_port = int.Parse(Properties.Resources.ECCIoT_Server_Port);
+        private static int ecc_server_port = int.Parse(ECC_sdk_windows.Properties.Resources.ECCIoT_Server_Port);
         //通信工具类
         private EccSocket eccSocket;
 
         /*回调接口*/
-        public IEccDataReceiveListener EccDataReceiveListener { private get; set; }
-        public IEccExceptionListener EccExceptionListener { private get; set; }
+        public static IEccDataReceiveListener EccDataReceiveListener { private get; set; }
+        public static IEccExceptionListener EccExceptionListener { private get; set; }
+
+        /*字符编码*/
+        private static Encoding encoding = Encoding.UTF8;
+        //字符编码
+        public static Encoding Encoding
+        {
+            set { encoding = value; if (GetInstance().eccSocket != null) GetInstance().eccSocket.Encoding=value; }
+            get { return encoding; }
+        }
 
         /*必要参数*/
         public string API_Key { get; set; }
@@ -60,17 +69,17 @@ namespace ECCIoT_sdk_windows
         /// 连接服务器
         /// </summary>
         /// <param name="listener"></param>
-        public static void Connect(IEccReceiptListener listener)
+        public static void Connect(IEccReceiptListener receiptListener)
         {
             //初始化EccSocket
-            if (GetInstance().eccSocket == null)
-            {
-                IPEndPoint ipep = new IPEndPoint(ecc_server_address, ecc_server_port);
-                GetInstance().eccSocket = new EccSocket(ipep);
-            }
+            if (GetInstance().eccSocket != null) return;
 
+            //实例化EccSocket对象
+            GetInstance().eccSocket = new EccSocket(GetInstance(), GetInstance(), GetInstance());
             //连接服务器
-            GetInstance().eccSocket.Connect(listener);
+            IPEndPoint ipep = new IPEndPoint(ecc_server_address, ecc_server_port);
+            GetInstance().eccSocket.Encoding = Encoding;
+            GetInstance().eccSocket.Connect(receiptListener, ipep);
         }
 
         /// <summary>
@@ -94,15 +103,19 @@ namespace ECCIoT_sdk_windows
         {
             if (GetInstance().eccSocket==null)
             {
+                listener.Ecc_Sent(listener, message, false);
                 //抛出异常
                 return;
-            }
-            if (!GetInstance().eccSocket.Socket.Connected)
+            }else if (!GetInstance().eccSocket.Socket.Connected)
             {
-                //由于采用异步连接，可能会处于连接中的状态
+                listener.Ecc_Sent(listener, message, false);
+                //由于采用异步连接，可能会处于连接中的状态。应抛出未连接的异常
                 return;
             }
-            GetInstance().eccSocket.Send(listener, message);
+            else
+            {
+                GetInstance().eccSocket.Send(listener, message);
+            }
         }
 
         /// <summary>
@@ -111,12 +124,17 @@ namespace ECCIoT_sdk_windows
         /// <param name="listener"></param>
         public static void Close(IEccReceiptListener listener)
         {
-            //关闭并销毁Socket通信对象
-            GetInstance().eccSocket.Dispose(listener);
-            //EccSocket对象置空
-            GetInstance().eccSocket = null;
+            if (GetInstance().eccSocket != null)
+            {
+                if (GetInstance().eccSocket.Socket.Connected)
+                {
+                    //关闭并销毁Socket通信对象
+                    GetInstance().eccSocket.Dispose(listener);
+                }
+                //EccSocket对象置空
+                GetInstance().eccSocket = null;
+            }
         }
-
 
         /*操作回执回调接口*/
         void IEccReceiptListener.Ecc_Connection(IEccReceiptListener listener, bool isSucceed)
@@ -135,18 +153,18 @@ namespace ECCIoT_sdk_windows
         /*数据接收回调接口*/
         void IEccDataReceiveListener.Ecc_Received(string msg, int len)
         {
-            if (GetInstance().EccDataReceiveListener != null)
+            if (EccDataReceiveListener != null)
             {
-                GetInstance().EccDataReceiveListener.Ecc_Received(msg,len);
+                EccDataReceiveListener.Ecc_Received(msg,len);
             }
         }
 
         /*异常错误回调接口*/
         void IEccExceptionListener.Ecc_BreakOff(Exception e)
         {
-            if (GetInstance().EccExceptionListener != null)
+            if (EccExceptionListener != null)
             {
-                GetInstance().EccExceptionListener.Ecc_BreakOff(e);
+                EccExceptionListener.Ecc_BreakOff(e);
             }
         }
     }

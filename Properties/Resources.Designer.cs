@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace ECCIoT_sdk_windows.Properties {
+namespace ECC_sdk_windows.Properties {
     using System;
     
     

@@ -16,12 +16,11 @@ namespace ECCIoT_sdk_windows
     {
         //Socket
         public Socket Socket { get; private set; }
-        private IPEndPoint ipep;
         private int maxCacheSize = 2048;
         //回调接口
-        public IEccReceiptListener EccReceiptListener { private get; set; }
-        public IEccDataReceiveListener EccDataReceiveListener { private get; set; }
-        public IEccExceptionListener EccExceptionListener { private get; set; }
+        private IEccReceiptListener EccReceiptListener { get; set; }
+        private IEccDataReceiveListener EccDataReceiveListener { get; set; }
+        private IEccExceptionListener EccExceptionListener { get; set; }
         //字符编码
         private Encoding encoding = Encoding.UTF8;
         public Encoding Encoding { set { encoding = value; } }
@@ -29,27 +28,30 @@ namespace ECCIoT_sdk_windows
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="ipep">网络终结点</param>
-        public EccSocket(IPEndPoint ipep)
+        
+        public EccSocket(IEccReceiptListener receiptListener, IEccDataReceiveListener dataReceiveListener, IEccExceptionListener exceptionListener)
         {
-            this.ipep = ipep;
+            EccReceiptListener = receiptListener;
+            EccDataReceiveListener = dataReceiveListener;
+            EccExceptionListener = exceptionListener;
         }
 
         /// <summary>
         /// 建立连接
         /// </summary>
-        public void Connect(IEccReceiptListener listener)
+        /// <param name="ipep">网络终结点</param>
+        public void Connect(IEccReceiptListener listener, IPEndPoint ipep)
         {
             //创建套接字  
-            Socket client = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+            Socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
 
             try
             {
                 //开始对一个远程主机建立异步的连接请求
-                client.BeginConnect(ipep, asyncResult =>
+                Socket.BeginConnect(ipep, asyncResult =>
                 {
                     //结束挂起的异步连接请求
-                    client.EndConnect(asyncResult);
+                    Socket.EndConnect(asyncResult);
                     //连接完成回调
                     EccReceiptListener.Ecc_Connection(listener, true);
                     //接受消息  
@@ -108,11 +110,18 @@ namespace ECCIoT_sdk_windows
                 Socket.BeginReceive(data, 0, data.Length, SocketFlags.None,
                 asyncResult =>
                 {
-                    int length = Socket.EndReceive(asyncResult);
-                    //消息接收回调
-                    EccDataReceiveListener.Ecc_Received(encoding.GetString(data), length);
-                    //重启异步接收数据
-                    Recive();
+                    try
+                    {
+                        int length = Socket.EndReceive(asyncResult);
+                        //消息接收回调
+                        if(length>0) EccDataReceiveListener.Ecc_Received(encoding.GetString(data), length);
+                        //重启异步接收数据
+                        Recive();
+                    }
+                    catch (ObjectDisposedException ex)
+                    {
+                        //Console.WriteLine(ex.Message);
+                    }
                 }, null);
             }
             catch (SocketException ex)
@@ -120,6 +129,7 @@ namespace ECCIoT_sdk_windows
                 //异常回调
                 EccExceptionListener.Ecc_BreakOff(ex);
             }
+            
         }
 
         /// <summary>
@@ -127,6 +137,7 @@ namespace ECCIoT_sdk_windows
         /// </summary>
         public void Dispose()
         {
+            if(Socket.Connected) Socket.Shutdown(SocketShutdown.Both);
             Socket.Close();
             Socket.Dispose();
         }
@@ -137,8 +148,11 @@ namespace ECCIoT_sdk_windows
         /// <param name="listener"></param>
         public void Dispose(IEccReceiptListener listener)
         {
-            Dispose();
-            EccReceiptListener.Ecc_Closed(listener);
+            Socket.BeginDisconnect(true, asyncResult =>
+            {
+                Dispose();
+                EccReceiptListener.Ecc_Closed(listener);
+            }, null);
         }
     }
 }
