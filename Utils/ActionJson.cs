@@ -25,7 +25,7 @@ namespace ECC_sdk_windows
             Message = (string)json["message"];
         }
 
-        public string ToJsonString()
+        public override string ToString()
         {
             return JsonConvert.SerializeObject(this);
         }

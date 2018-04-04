@@ -1,4 +1,7 @@
-﻿using ECCIoT_sdk_windows;
+﻿using ECC_sdk_windows.Adapter;
+using ECC_sdk_windows.EccArgs;
+using ECC_sdk_windows.Listener;
+using ECCIoT_sdk_windows;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,12 +13,12 @@ namespace ECC_sdk_windows
     public delegate void x(string msg);
     public delegate void y(string msg);
 
-    public class EccEventAdapter : IEccReceiptListener, IEccDataReceiveListener, IEccExceptionListener, IEccCommand
+    public class EccAdapter : IEccReceiptListener, IEccDataReceiveListener, IEccExceptionListener, IEccCmd
     {
         /*EccEventAdapter回调接口*/
         private IEccEvevt eccEvevt;
 
-        public EccEventAdapter(IEccEvevt eccEvevt)
+        public EccAdapter(IEccEvevt eccEvevt)
         {
             this.eccEvevt = eccEvevt;
         }
@@ -45,25 +48,27 @@ namespace ECC_sdk_windows
         {
             
         }
+
+        void IEccCmd.EccCmd_SendAPIKey(AsyncCallback callback, SendAPIKeyCmdArgs args)
+        {
+            throw new NotImplementedException();
+        }
+
+        void IEccCmd.EccCmd_ControlItem(AsyncCallback callback, ControlItemCmdArgs args)
+        {
+            throw new NotImplementedException();
+        }
     }
 
-    public interface IEccEvevt
+    interface IEccEventAdapter
     {
-        //接收服务端询问API_KEY
-
-        //接收更新设备项的数据集
-
-        //接收紧急消息
-
-        //
-    }
-
-    public interface IEccCommand
-    {
-        //发送API_KEY
-
-        //发送单个设备的控制命令
-
 
     }
+
+
+
+
+
+    
+
 }

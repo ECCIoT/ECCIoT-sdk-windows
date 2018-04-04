@@ -1,4 +1,5 @@
 ﻿using ECC_sdk_windows;
+using ECC_sdk_windows.Listener;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -22,19 +23,12 @@ namespace ECCIoT_sdk_windows
         /// <summary>
         /// 获取实例
         /// </summary>
-        /// <returns></returns>
         private static ECCIoT GetInstance()
         {
             if (uniqueInstance == null)
-            {
                 lock (locker)
-                {
                     if (uniqueInstance == null)
-                    {
                         uniqueInstance = new ECCIoT();
-                    }
-                }
-            }
             return uniqueInstance;
         }
         //======================================================================================
@@ -50,7 +44,8 @@ namespace ECCIoT_sdk_windows
         private EccSocket eccSocket;
 
         /*Ecc事件适配器*/
-        private EccEventAdapter eventAdapter;
+        private EccAdapter eventAdapter;
+        public static EccAdapter EventAdapter { get { return GetInstance().eventAdapter; } }
 
         /*必要参数*/
         public string API_Key { get; set; }
@@ -68,13 +63,9 @@ namespace ECCIoT_sdk_windows
 
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="receiptListener"></param>
-        /// <param name="eccEvevt"></param>
-        public delegate void ConnectDelegate(IEccReceiptListener receiptListener, EccEventAdapter adapter);
-        public static void Connect(IEccReceiptListener receiptListener, EccEventAdapter adapter)
+        //建立连接
+        public delegate void ConnectDelegate(IEccReceiptListener receiptListener, EccAdapter adapter);
+        public static void Connect(IEccReceiptListener receiptListener, EccAdapter adapter)
         {
             //初始化EccSocket
             if (GetInstance().eccSocket != null) return;
@@ -89,17 +80,13 @@ namespace ECCIoT_sdk_windows
             GetInstance().eccSocket.Encoding = Encoding;
             GetInstance().eccSocket.Connect(receiptListener, ipep);
         }
-        public static void Connect(AsyncCallback callback, EccEventAdapter adapter)
+        public static void Connect(AsyncCallback callback, EccAdapter adapter)
         {
             ConnectDelegate connectFn = Connect;
             connectFn.BeginInvoke(null, adapter, callback, null);
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="listener"></param>
-        /// <param name="message"></param>
+        //发送数据
         public delegate void SendDelegate(IEccReceiptListener listener, string message);
         public static void Send(IEccReceiptListener listener,string message)
         {
@@ -125,10 +112,7 @@ namespace ECCIoT_sdk_windows
             sendFn.BeginInvoke(null, message, callback, null);
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="listener"></param>
+        //关闭连接
         public delegate void CloseDelegate(IEccReceiptListener listener);
         public static void Close(IEccReceiptListener listener)
         {

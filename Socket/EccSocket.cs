@@ -1,4 +1,6 @@
-﻿using System;
+﻿using ECC_sdk_windows;
+using ECC_sdk_windows.Listener;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -36,6 +38,13 @@ namespace ECCIoT_sdk_windows
             EccExceptionListener = exceptionListener;
         }
 
+        public EccSocket(EccAdapter adapter)
+        {
+            EccReceiptListener = adapter;
+            EccDataReceiveListener = adapter;
+            EccExceptionListener = adapter;
+        }
+
         /// <summary>
         /// 建立连接
         /// </summary>
@@ -53,7 +62,7 @@ namespace ECCIoT_sdk_windows
                     //结束挂起的异步连接请求
                     Socket.EndConnect(asyncResult);
                     //连接完成回调
-                    EccReceiptListener.Ecc_Connection(listener, true);
+                    if(listener!=null) EccReceiptListener.Ecc_Connection(listener, true);
                     //接受消息  
                     Recive();
                 }, null);
@@ -61,7 +70,7 @@ namespace ECCIoT_sdk_windows
             catch (SocketException ex)
             {
                 //与服务器连接失败
-                EccReceiptListener.Ecc_Connection(listener, false);
+                if (listener != null) EccReceiptListener.Ecc_Connection(listener, false);
                 //异常回调
                 EccExceptionListener.Ecc_BreakOff(ex);
             }
@@ -85,13 +94,13 @@ namespace ECCIoT_sdk_windows
                     //完成发送消息  
                     int length = Socket.EndSend(asyncResult);
                     //消息发送成功
-                    EccReceiptListener.Ecc_Sent(listener, message, true);
+                    if (listener != null) EccReceiptListener.Ecc_Sent(listener, message, true);
                 }, null);
             }
             catch (SocketException ex)
             {
                 //消息发送失败
-                EccReceiptListener.Ecc_Sent(listener, message, false);
+                if (listener != null) EccReceiptListener.Ecc_Sent(listener, message, false);
                 //异常回调
                 EccExceptionListener.Ecc_BreakOff(ex);
             }
@@ -151,7 +160,7 @@ namespace ECCIoT_sdk_windows
             Socket.BeginDisconnect(true, asyncResult =>
             {
                 Dispose();
-                EccReceiptListener.Ecc_Closed(listener);
+                if(listener!=null) EccReceiptListener.Ecc_Closed(listener);
             }, null);
         }
     }
