@@ -44,11 +44,11 @@ namespace ECCIoT_sdk_windows
         private EccSocket eccSocket;
 
         /*Ecc事件适配器*/
-        private EccAdapter eventAdapter;
-        public static EccAdapter EventAdapter { get { return GetInstance().eventAdapter; } }
+        private EccAdapter eccAdapter;
+        public static EccAdapter EventAdapter { get { return GetInstance().eccAdapter; } }
 
         /*必要参数*/
-        public string API_Key { get; set; }
+        public static string API_Key { get; set; }
 
         /*字符编码*/
         private static Encoding encoding = Encoding.UTF8;
@@ -67,19 +67,26 @@ namespace ECCIoT_sdk_windows
         public delegate void ConnectDelegate(IEccReceiptListener receiptListener, EccAdapter adapter);
         public static void Connect(IEccReceiptListener receiptListener, EccAdapter adapter)
         {
+            //检查是否已设置APIKEY
+            if(API_Key == null) throw new NotSetAPIKeyException();
+
             //初始化EccSocket
             if (GetInstance().eccSocket != null) return;
 
-            //实例化EccEventAdapter对象
-            GetInstance().eventAdapter = adapter;
+            //保存Ecc适配器对象，并为其设置ECCIoT实例
+            GetInstance().eccAdapter = adapter;
+            adapter.EcciotInstance = GetInstance();
 
-            //实例化EccSocket对象
-            GetInstance().eccSocket = new EccSocket(GetInstance().eventAdapter);
+            //实例化Ecc通信对象
+            GetInstance().eccSocket = new EccSocket(GetInstance().eccAdapter);
+
+            //设置字符编码
+            GetInstance().eccSocket.Encoding = Encoding;
 
             //连接服务器
-            GetInstance().eccSocket.Encoding = Encoding;
             GetInstance().eccSocket.Connect(receiptListener, ipep);
         }
+
         public static void Connect(AsyncCallback callback, EccAdapter adapter)
         {
             ConnectDelegate connectFn = Connect;
@@ -88,25 +95,26 @@ namespace ECCIoT_sdk_windows
 
         //发送数据
         public delegate void SendDelegate(IEccReceiptListener listener, string message);
-        public static void Send(IEccReceiptListener listener,string message)
+        public void Send(IEccReceiptListener listener,string message)
         {
             if (GetInstance().eccSocket==null)
             {
+                //未连接服务器
                 listener.Ecc_Sent(listener, message, false);
-                //抛出异常
-                return;
-            }else if (!GetInstance().eccSocket.Socket.Connected)
+                throw new UnconnectedServerException();
+            }
+            else if (!GetInstance().eccSocket.Socket.Connected)
             {
+                //未完成与服务器的连接
                 listener.Ecc_Sent(listener, message, false);
-                //由于采用异步连接，可能会处于连接中的状态。应抛出未连接的异常
-                return;
+                throw new UnconnectedCompletionException();
             }
             else
             {
                 GetInstance().eccSocket.Send(listener, message);
             }
         }
-        public static void Send(AsyncCallback callback, string message)
+        public void Send(AsyncCallback callback, string message)
         {
             SendDelegate sendFn = Send;
             sendFn.BeginInvoke(null, message, callback, null);
