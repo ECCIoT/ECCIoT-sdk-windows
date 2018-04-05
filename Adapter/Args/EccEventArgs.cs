@@ -8,9 +8,6 @@ namespace ECC_sdk_windows.EccArgs
 {
     public class CheckAPIKeyEventArgs : BaseEventArgs
     {
-        public static void Main()
-        {
-            CheckAPIKeyEventArgs args = CheckAPIKeyEventArgs.Deserialize<CheckAPIKeyEventArgs>("");
-        }
+        
     }
 }

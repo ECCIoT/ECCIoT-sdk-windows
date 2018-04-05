@@ -6,6 +6,13 @@ using System.Threading.Tasks;
 
 namespace ECC_sdk_windows.EccArgs
 {
-    public class SendAPIKeyCmdArgs : BaseCmdArgs { }
-    public class ControlItemCmdArgs : BaseCmdArgs { }
+    public class SendAPIKeyCmdArgs : BaseCmdArgs
+    {
+        public string APIKey { get; set; }
+    }
+    public class ControlItemCmdArgs : BaseCmdArgs
+    {
+        public string ItemID { get; set; }
+        public string ATCmd  { get; set; }
+    }
 }
