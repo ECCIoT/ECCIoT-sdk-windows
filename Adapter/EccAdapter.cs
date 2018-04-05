@@ -18,10 +18,21 @@ namespace ECC_sdk_windows
         /*EccEventAdapter回调接口*/
         private IEccEvevt eccEvevt;
 
+        //ECCIoT示例
+        public ECCIoT EcciotInstance { private get; set; }
+
         public EccAdapter(IEccEvevt eccEvevt)
         {
             this.eccEvevt = eccEvevt;
         }
+
+        /*
+        public EccAdapter(IEccEvevt eccEvevt, ECCIoT ecciotInstance)
+        {
+            this.eccEvevt = eccEvevt;
+            this.EcciotInstance = ecciotInstance;
+        }
+        */
 
         /*操作回执回调接口*/
         void IEccReceiptListener.Ecc_Connection(IEccReceiptListener listener, bool isSucceed)
@@ -49,14 +60,26 @@ namespace ECC_sdk_windows
             
         }
 
-        void IEccCmd.EccCmd_SendAPIKey(AsyncCallback callback, SendAPIKeyCmdArgs args)
+        //发送APIKey
+        void IEccCmd.EccCmd_CheckAPIKey(AsyncCallback callback, SendAPIKeyCmdArgs args)
         {
-            throw new NotImplementedException();
+            CmdJson cmd = new CmdJson
+            {
+                Action = "EccCmd_CheckAPIKey",
+                Content = args.ToString()
+            };
+            EcciotInstance.Send(callback, cmd.ToString());
         }
 
+        //发送控制命令
         void IEccCmd.EccCmd_ControlItem(AsyncCallback callback, ControlItemCmdArgs args)
         {
-            throw new NotImplementedException();
+            CmdJson cmd = new CmdJson
+            {
+                Action = "EccCmd_ControlItem",
+                Content = args.ToString()
+            };
+            EcciotInstance.Send(callback, cmd.ToString());
         }
     }
 
