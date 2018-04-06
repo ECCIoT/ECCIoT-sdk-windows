@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ECCIoT_sdk_windows
+namespace ECCIoT_sdk_windows.EccException
 {
     /// <summary>
     /// 尚未对ECCIoT设置APIKey
@@ -39,6 +39,15 @@ namespace ECCIoT_sdk_windows
         }
     }
 
-
+    /// <summary>
+    /// 接收到来自服务器的未知事件消息
+    /// </summary>
+    public class UnknownEventException : Exception
+    {
+        public override string ToString()
+        {
+            return "Receive unknown event messages from the server.";
+        }
+    }
 
 }
