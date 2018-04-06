@@ -45,9 +45,9 @@
   <ItemGroup>
     <Compile Include="Adapter\Function\IEccCmd.cs" />
     <Compile Include="Adapter\Function\IEccEvevt.cs" />
-    <Compile Include="Socket\Listener\IEccDataReceiveListener.cs" />
-    <Compile Include="Socket\Listener\IEccExceptionListener.cs" />
-    <Compile Include="Socket\Listener\IEccReceiptListener.cs" />
+    <Compile Include="Comm\Listener\IEccDataReceiveListener.cs" />
+    <Compile Include="Comm\Listener\IEccExceptionListener.cs" />
+    <Compile Include="Comm\Listener\IEccReceiptListener.cs" />
     <Compile Include="Utils\ActionJson.cs" />
     <Compile Include="Adapter\Args\BaseEccArgs.cs" />
     <Compile Include="Adapter\Args\EccCmdArgs.cs" />
@@ -55,7 +55,7 @@
     <Compile Include="Adapter\EccAdapter.cs" />
     <Compile Include="Exception\EccException.cs" />
     <Compile Include="ECCIoT.cs" />
-    <Compile Include="Socket\EccSocket.cs" />
+    <Compile Include="Comm\EccSocket.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>

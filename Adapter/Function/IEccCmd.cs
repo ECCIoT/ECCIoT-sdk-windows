@@ -1,11 +1,11 @@
-﻿using ECC_sdk_windows.EccArgs;
+﻿using ECC_sdk_windows.Adapter.Args;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ECC_sdk_windows.Adapter
+namespace ECC_sdk_windows.Adapter.Function
 {
     public interface IEccCmd
     {

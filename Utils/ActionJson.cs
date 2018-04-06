@@ -1,16 +1,11 @@
-﻿using ECC_sdk_windows.EccArgs;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ECC_sdk_windows
 {
 
-    class ActionJson
+    public abstract class ActionJson
     {
         public override string ToString()
         {
@@ -24,7 +19,7 @@ namespace ECC_sdk_windows
     }
 
 
-    class EventJson : ActionJson
+    public class EventJson : ActionJson
     {
         public string Action { set; get; }
         public Boolean Flag { set; get; }
@@ -42,7 +37,7 @@ namespace ECC_sdk_windows
         }
     }
 
-    class CmdJson : ActionJson
+    public class CmdJson : ActionJson
     {
         public string Action { set; get; }
         public string Content { set; get; }

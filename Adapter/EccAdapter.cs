@@ -1,18 +1,12 @@
-﻿using ECC_sdk_windows.Adapter;
-using ECC_sdk_windows.EccArgs;
-using ECC_sdk_windows.Listener;
-using ECCIoT_sdk_windows;
+﻿using ECCIoT_sdk_windows;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using ECC_sdk_windows.Comm.Listener;
+using ECC_sdk_windows.Adapter.Args;
+using ECC_sdk_windows.Adapter.Function;
+using ECCIoT_sdk_windows.EccException;
 
-namespace ECC_sdk_windows
+namespace ECC_sdk_windows.Adapter
 {
-    public delegate void x(string msg);
-    public delegate void y(string msg);
-
     public class EccAdapter : IEccReceiptListener, IEccDataReceiveListener, IEccExceptionListener, IEccCmd
     {
         /*EccEventAdapter回调接口*/
@@ -25,14 +19,6 @@ namespace ECC_sdk_windows
         {
             this.eccEvevt = eccEvevt;
         }
-
-        /*
-        public EccAdapter(IEccEvevt eccEvevt, ECCIoT ecciotInstance)
-        {
-            this.eccEvevt = eccEvevt;
-            this.EcciotInstance = ecciotInstance;
-        }
-        */
 
         /*操作回执回调接口*/
         void IEccReceiptListener.Ecc_Connection(IEccReceiptListener listener, bool isSucceed)
@@ -51,13 +37,35 @@ namespace ECC_sdk_windows
         /*数据接收回调接口*/
         void IEccDataReceiveListener.Ecc_Received(string msg, int len)
         {
-            
+            ParsingCommands(new EventJson(msg));
         }
 
         /*异常错误回调接口*/
         void IEccExceptionListener.Ecc_BreakOff(Exception e)
         {
             
+        }
+
+        /// <summary>
+        /// 解析命令
+        /// </summary>
+        /// <param name="eventJson"></param>
+        private void ParsingCommands(EventJson eventJson)
+        {
+            switch (eventJson.Action)
+            {
+                case "EccEvent_CheckAPIKey":
+                    eccEvevt.EccEvent_CheckAPIKey(new CheckAPIKeyEventArgs(eventJson.Content));
+                    break;
+                case "EccEvent_UpdateItemsData":
+                    eccEvevt.EccEvent_UpdateItemsData(new UpdateItemsDataEventArgs(eventJson.Content));
+                    break;
+                case "EccEvent_Alarm":
+                    eccEvevt.EccEvent_Alarm(new AlarmEventArgs(eventJson.Content));
+                    break;
+                default:
+                    throw new UnknownEventException();
+            }
         }
 
         //发送APIKey

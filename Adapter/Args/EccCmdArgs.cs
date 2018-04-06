@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ECC_sdk_windows.EccArgs
+namespace ECC_sdk_windows.Adapter.Args
 {
     public class SendAPIKeyCmdArgs : BaseCmdArgs
     {
