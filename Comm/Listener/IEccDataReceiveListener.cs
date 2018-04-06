@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ECC_sdk_windows.Listener
+namespace ECC_sdk_windows.Comm.Listener
 {
     /// <summary>
     /// 数据接收回调接口

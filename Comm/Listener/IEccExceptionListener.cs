@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace ECC_sdk_windows.Listener
+namespace ECC_sdk_windows.Comm.Listener
 {
     /// <summary>
     /// 异常错误回调接口

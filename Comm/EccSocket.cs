@@ -1,14 +1,11 @@
-﻿using ECC_sdk_windows;
-using ECC_sdk_windows.Listener;
+﻿using ECC_sdk_windows.Adapter;
+using ECC_sdk_windows.Comm.Listener;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
-using System.Threading.Tasks;
 
-namespace ECCIoT_sdk_windows
+namespace ECCIoT_sdk_windows.Comm
 {
     /// <summary>
     /// 异步通信的Socket客户端工具类
