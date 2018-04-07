@@ -14,6 +14,20 @@ namespace ECC_sdk_windows.Adapter.Args
 
         }
     }
+    public class APIKeyVerifiedEventArgs : BaseEventArgs
+    {
+        public APIKeyVerifiedEventArgs(string content)
+        {
+
+        }
+    }
+    public class APIKeyInvalidEventArgs : BaseEventArgs
+    {
+        public APIKeyInvalidEventArgs(string content)
+        {
+
+        }
+    }
 
     /// <summary>
     /// 更新项目集数据的事件参数

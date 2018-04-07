@@ -9,8 +9,12 @@ namespace ECC_sdk_windows.Adapter.Function
 {
     public interface IEccEvevt
     {
-        //接收服务端询问API_KEY
+        //询问API_KEY
         void EccEvent_CheckAPIKey(CheckAPIKeyEventArgs args);
+        //APIKey已通过验证
+        void EccEvent_APIKeyVerified(APIKeyVerifiedEventArgs args);
+        //APIKey无效
+        void EccEvent_APIKeyInvalid(APIKeyInvalidEventArgs args);
 
         //接收更新设备项的数据集
         void EccEvent_UpdateItemsData(UpdateItemsDataEventArgs args);
