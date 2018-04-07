@@ -43,10 +43,7 @@ namespace ECCIoT_sdk_windows
 
         /*Ecc事件适配器*/
         private EccAdapter eccAdapter;
-        public static EccAdapter EventAdapter { get { return GetInstance().eccAdapter; } }
-
-        /*必要参数*/
-        public static string API_Key { get; set; }
+        public static EccAdapter Adapter { get { return GetInstance().eccAdapter; } }
 
         /*字符编码*/
         private static Encoding encoding = Encoding.UTF8;
@@ -62,14 +59,10 @@ namespace ECCIoT_sdk_windows
         }
 
         //建立连接
-        public delegate void ConnectDelegate(IEccReceiptListener receiptListener, EccAdapter adapter);
-        public static void Connect(IEccReceiptListener receiptListener, EccAdapter adapter)
+        public static void Connect(EccAdapter adapter, IEccReceiptListener receiptListener)
         {
-            //检查是否已设置APIKEY
-            if(API_Key == null) throw new NotSetAPIKeyException();
-
             //初始化EccSocket
-            if (GetInstance().eccSocket != null) return;
+            if (GetInstance().eccSocket != null && GetInstance().eccSocket.Socket.Connected) return;
 
             //保存Ecc适配器对象，并为其设置ECCIoT实例
             GetInstance().eccAdapter = adapter;
@@ -83,20 +76,33 @@ namespace ECCIoT_sdk_windows
             };
 
             //连接服务器
-            GetInstance().eccSocket.Connect(receiptListener, ipep);
+            GetInstance().eccSocket.Connect(ipep, receiptListener);
         }
 
-        public static void Connect(AsyncCallback callback, EccAdapter adapter)
+        public static void Connect(EccAdapter adapter, AsyncCallback successful, AsyncCallback failure)
         {
-            ConnectDelegate connectFn = Connect;
-            connectFn.BeginInvoke(null, adapter, callback, null);
+            //初始化EccSocket
+            if (GetInstance().eccSocket != null && GetInstance().eccSocket.Socket.Connected) return;
+
+            //保存Ecc适配器对象，并为其设置ECCIoT实例
+            GetInstance().eccAdapter = adapter;
+            adapter.EcciotInstance = GetInstance();
+
+            //实例化Ecc通信对象
+            GetInstance().eccSocket = new EccSocket(GetInstance().eccAdapter)
+            {
+                //设置字符编码
+                Encoding = Encoding
+            };
+
+            //连接服务器
+            GetInstance().eccSocket.Connect(ipep,successful,failure);
         }
 
         //发送数据
-        public delegate void SendDelegate(IEccReceiptListener listener, string message);
-        public void Send(IEccReceiptListener listener,string message)
+        public void Send(string message, IEccReceiptListener listener)
         {
-            if (GetInstance().eccSocket==null)
+            if (GetInstance().eccSocket == null)
             {
                 //未连接服务器
                 listener.Ecc_Sent(listener, message, false);
@@ -110,13 +116,28 @@ namespace ECCIoT_sdk_windows
             }
             else
             {
-                GetInstance().eccSocket.Send(listener, message);
+                GetInstance().eccSocket.Send(message,listener);
             }
         }
-        public void Send(AsyncCallback callback, string message)
+
+        public void Send(string message, AsyncCallback successful, AsyncCallback failure)
         {
-            SendDelegate sendFn = Send;
-            sendFn.BeginInvoke(null, message, callback, null);
+            //检查连接状态
+            if(GetInstance().eccSocket == null || !GetInstance().eccSocket.Socket.Connected)
+            {
+                ((Action)VoidAction).BeginInvoke(failure,null);
+
+                if (GetInstance().eccSocket == null)
+                {
+                    throw new UnconnectedServerException();
+                }
+                else
+                {
+                    throw new UnconnectedCompletionException();
+                }
+            }
+            //发送命令
+            GetInstance().eccSocket.Send(message, successful, failure);
         }
 
         //关闭连接
@@ -128,7 +149,7 @@ namespace ECCIoT_sdk_windows
                 if (GetInstance().eccSocket.Socket.Connected)
                 {
                     //关闭并销毁Socket通信对象
-                    GetInstance().eccSocket.Dispose(listener);
+                    GetInstance().eccSocket.Close(listener);
                 }
                 //EccSocket对象置空
                 GetInstance().eccSocket = null;
@@ -138,6 +159,11 @@ namespace ECCIoT_sdk_windows
         {
             CloseDelegate closeFn = Close;
             closeFn.BeginInvoke(null, callback, null);
+        }
+
+        private void VoidAction()
+        {
+
         }
     }
 }

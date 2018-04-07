@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Net.Sockets;
 
 namespace ECC_sdk_windows.Comm.Listener
 {
@@ -10,7 +11,9 @@ namespace ECC_sdk_windows.Comm.Listener
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="e"></param>
-        void Ecc_BreakOff(Exception e);
+        /// <param name="ex"></param>
+        void Ecc_BreakOff(Exception ex);
+
+        void Ecc_ConnectionFail(SocketException ex);
     }
 }

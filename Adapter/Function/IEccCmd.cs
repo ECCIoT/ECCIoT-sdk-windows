@@ -16,15 +16,15 @@ namespace ECC_sdk_windows.Adapter.Function
         {
            //do somethings... 
         }
-        void IEccCmd.EccCmd_Example(AsyncCallback callback, ExampleCmdArgs args)
+        void IEccCmd.EccCmd_Example(ExampleCmdArgs args, AsyncCallback callback)
         {
             ((Example)EccCmd_Example).BeginInvoke(args, callback, null);
         }
         */
 
         //发送API_KEY
-        void EccCmd_CheckAPIKey(AsyncCallback callback, SendAPIKeyCmdArgs args);
+        void EccCmd_CheckAPIKey(SendAPIKeyCmdArgs args, AsyncCallback successful, AsyncCallback failure);
         //发送单个设备的控制命令
-        void EccCmd_ControlItem(AsyncCallback callback, ControlItemCmdArgs args);
+        void EccCmd_ControlItem(ControlItemCmdArgs args, AsyncCallback successful, AsyncCallback failure);
     }
 }

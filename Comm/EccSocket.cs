@@ -42,43 +42,69 @@ namespace ECCIoT_sdk_windows.Comm
             EccExceptionListener = adapter;
         }
 
-        /// <summary>
-        /// 建立连接
-        /// </summary>
-        /// <param name="ipep">网络终结点</param>
-        public void Connect(IEccReceiptListener listener, IPEndPoint ipep)
+        public void Connect(IPEndPoint ipep, IEccReceiptListener listener)
         {
             //创建套接字  
             Socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
 
-            try
+            //开始对一个远程主机建立异步的连接请求
+            Socket.BeginConnect(ipep, asyncResult =>
             {
-                //开始对一个远程主机建立异步的连接请求
-                Socket.BeginConnect(ipep, asyncResult =>
+                try
                 {
                     //结束挂起的异步连接请求
                     Socket.EndConnect(asyncResult);
                     //连接完成回调
-                    if(listener!=null) EccReceiptListener.Ecc_Connection(listener, true);
+                    if (listener != null) EccReceiptListener.Ecc_Connection(listener, true);
                     //接受消息  
                     Recive();
-                }, null);
-            }
-            catch (SocketException ex)
-            {
-                //与服务器连接失败
-                if (listener != null) EccReceiptListener.Ecc_Connection(listener, false);
-                //异常回调
-                EccExceptionListener.Ecc_BreakOff(ex);
-            }
+                }
+                catch (SocketException ex)
+                {
+                    //与服务器连接失败
+                    if (listener != null) EccReceiptListener.Ecc_Connection(listener, false);
+                    //异常回调
+                    EccExceptionListener.Ecc_ConnectionFail(ex);
+                }
+            }, null);
+        }
 
+        public void Connect(IPEndPoint ipep, AsyncCallback successful,AsyncCallback failure)
+        {
+            Action action = VoidAction;
+            //创建套接字  
+            Socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+
+            //开始对一个远程主机建立异步的连接请求
+            Socket.BeginConnect(ipep, asyncResult =>
+            {
+                try
+                {
+                    //结束挂起的异步连接请求
+                    Socket.EndConnect(asyncResult);
+
+                    //执行异步回调
+                    if (successful != null) action.BeginInvoke(successful, null);
+                    //接受消息  
+                    Recive();
+                }
+                catch (SocketException ex)
+                {
+                    //执行异步回调
+                    if (failure != null) action.BeginInvoke(failure, null);
+                    //异常回调
+                    EccExceptionListener.Ecc_ConnectionFail(ex);
+                }
+            }, null);
+
+            
         }
 
         /// <summary>
         /// 发送数据
         /// </summary>
         /// <param name="message">消息字符串</param>
-        public void Send(IEccReceiptListener listener, string message)
+        public void Send(string message, IEccReceiptListener listener)
         {
             if (Socket == null || message == string.Empty) return;
             //编码  
@@ -98,6 +124,32 @@ namespace ECCIoT_sdk_windows.Comm
             {
                 //消息发送失败
                 if (listener != null) EccReceiptListener.Ecc_Sent(listener, message, false);
+                //异常回调
+                EccExceptionListener.Ecc_BreakOff(ex);
+            }
+        }
+
+        public void Send(string message, AsyncCallback successful, AsyncCallback failure)
+        {
+            Action action = VoidAction;
+            if (Socket == null || message == string.Empty) return;
+            //编码  
+            byte[] data = encoding.GetBytes(message);
+            try
+            {
+                //异步发送数据
+                Socket.BeginSend(data, 0, data.Length, SocketFlags.None, asyncResult =>
+                {
+                    //完成发送消息  
+                    int length = Socket.EndSend(asyncResult);
+                    //执行异步回调
+                    if (successful != null) action.BeginInvoke(successful, null);
+                }, null);
+            }
+            catch (SocketException ex)
+            {
+                //执行异步回调
+                if(failure!=null) action.BeginInvoke(failure, null);
                 //异常回调
                 EccExceptionListener.Ecc_BreakOff(ex);
             }
@@ -152,13 +204,24 @@ namespace ECCIoT_sdk_windows.Comm
         /// 销毁对象并执行回调
         /// </summary>
         /// <param name="listener"></param>
-        public void Dispose(IEccReceiptListener listener)
+        public void Close(IEccReceiptListener listener)
         {
             Socket.BeginDisconnect(true, asyncResult =>
             {
                 Dispose();
-                if(listener!=null) EccReceiptListener.Ecc_Closed(listener);
+                if (listener != null) EccReceiptListener.Ecc_Closed(listener);
             }, null);
         }
+
+        public void Close(AsyncCallback callback)
+        {
+            Socket.BeginDisconnect(true, asyncResult =>
+            {
+                Action action = Dispose;
+                action.BeginInvoke(callback, null);
+            }, null);
+        }
+
+        void VoidAction() { }
     }
 }

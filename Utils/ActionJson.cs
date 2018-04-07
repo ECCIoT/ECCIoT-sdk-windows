@@ -26,14 +26,23 @@ namespace ECC_sdk_windows
         public string Content { set; get; }
         public string Message { set; get; }
 
-        public EventJson(string strJson)
+        public EventJson(string strJson) 
         {
-            JObject json = JObject.Parse(strJson);
-
-            Action = (string)json["action"];
-            Flag = (Boolean)json["flag"];
-            Content = (string)json["content"];
-            Message = (string)json["message"];
+            try
+            {
+                JObject json = JObject.Parse(strJson);
+                
+                Action = (string)json["action"];
+                if (json.ContainsKey("flag")) Flag = (Boolean)json["flag"];
+                if (json.ContainsKey("content")) Content = (string)json["content"];
+                if (json.ContainsKey("message")) Message = (string)json["message"]; 
+            }catch(JsonReaderException ex)
+            {
+                throw ex;
+            }catch(ArgumentNullException ex)
+            {
+                throw ex;
+            }
         }
     }
 

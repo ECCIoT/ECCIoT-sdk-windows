@@ -4,6 +4,7 @@ using ECC_sdk_windows.Comm.Listener;
 using ECC_sdk_windows.Adapter.Args;
 using ECC_sdk_windows.Adapter.Function;
 using ECCIoT_sdk_windows.EccException;
+using System.Net.Sockets;
 
 namespace ECC_sdk_windows.Adapter
 {
@@ -41,7 +42,11 @@ namespace ECC_sdk_windows.Adapter
         }
 
         /*异常错误回调接口*/
-        void IEccExceptionListener.Ecc_BreakOff(Exception e)
+        void IEccExceptionListener.Ecc_BreakOff(Exception ex)
+        {
+            
+        }
+        void IEccExceptionListener.Ecc_ConnectionFail(SocketException ex)
         {
             
         }
@@ -57,6 +62,12 @@ namespace ECC_sdk_windows.Adapter
                 case "EccEvent_CheckAPIKey":
                     eccEvevt.EccEvent_CheckAPIKey(new CheckAPIKeyEventArgs(eventJson.Content));
                     break;
+                case "EccEvent_APIKeyVerified":
+                    eccEvevt.EccEvent_APIKeyVerified(new APIKeyVerifiedEventArgs(eventJson.Content));
+                    break;
+                case "EccEvent_APIKeyInvalid":
+                    eccEvevt.EccEvent_APIKeyInvalid(new APIKeyInvalidEventArgs(eventJson.Content));
+                    break;
                 case "EccEvent_UpdateItemsData":
                     eccEvevt.EccEvent_UpdateItemsData(new UpdateItemsDataEventArgs(eventJson.Content));
                     break;
@@ -68,27 +79,27 @@ namespace ECC_sdk_windows.Adapter
             }
         }
 
-        //发送APIKey
-        void IEccCmd.EccCmd_CheckAPIKey(AsyncCallback callback, SendAPIKeyCmdArgs args)
+        public void EccCmd_CheckAPIKey(SendAPIKeyCmdArgs args, AsyncCallback successful, AsyncCallback failure)
         {
             CmdJson cmd = new CmdJson
             {
                 Action = "EccCmd_CheckAPIKey",
                 Content = args.ToString()
             };
-            EcciotInstance.Send(callback, cmd.ToString());
+            EcciotInstance.Send(cmd.ToString(),successful, failure);
         }
 
-        //发送控制命令
-        void IEccCmd.EccCmd_ControlItem(AsyncCallback callback, ControlItemCmdArgs args)
+        public void EccCmd_ControlItem(ControlItemCmdArgs args, AsyncCallback successful, AsyncCallback failure)
         {
             CmdJson cmd = new CmdJson
             {
                 Action = "EccCmd_ControlItem",
                 Content = args.ToString()
             };
-            EcciotInstance.Send(callback, cmd.ToString());
+            EcciotInstance.Send(cmd.ToString(),successful, failure);
         }
+
+        
     }
 
     interface IEccEventAdapter
