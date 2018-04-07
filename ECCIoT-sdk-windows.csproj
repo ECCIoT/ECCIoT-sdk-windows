@@ -43,16 +43,16 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Adapter\Function\IEccCmd.cs" />
-    <Compile Include="Adapter\Function\IEccEvevt.cs" />
+    <Compile Include="Manager\Function\IEccCmd.cs" />
+    <Compile Include="Manager\Function\IEccEvevt.cs" />
     <Compile Include="Comm\Listener\IEccDataReceiveListener.cs" />
     <Compile Include="Comm\Listener\IEccExceptionListener.cs" />
     <Compile Include="Comm\Listener\IEccReceiptListener.cs" />
     <Compile Include="Utils\ActionJson.cs" />
-    <Compile Include="Adapter\Args\BaseEccArgs.cs" />
-    <Compile Include="Adapter\Args\EccCmdArgs.cs" />
-    <Compile Include="Adapter\Args\EccEventArgs.cs" />
-    <Compile Include="Adapter\EccAdapter.cs" />
+    <Compile Include="Manager\Args\BaseEccArgs.cs" />
+    <Compile Include="Manager\Args\EccCmdArgs.cs" />
+    <Compile Include="Manager\Args\EccEventArgs.cs" />
+    <Compile Include="Manager\EccManager.cs" />
     <Compile Include="Exception\EccException.cs" />
     <Compile Include="ECCIoT.cs" />
     <Compile Include="Comm\EccSocket.cs" />

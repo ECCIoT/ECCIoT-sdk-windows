@@ -1,4 +1,4 @@
-﻿using ECC_sdk_windows.Adapter;
+﻿using ECC_sdk_windows.Manager;
 using ECC_sdk_windows.Comm.Listener;
 using System;
 using System.Net;
@@ -35,7 +35,7 @@ namespace ECCIoT_sdk_windows.Comm
             EccExceptionListener = exceptionListener;
         }
 
-        public EccSocket(EccAdapter adapter)
+        public EccSocket(EccManager adapter)
         {
             EccReceiptListener = adapter;
             EccDataReceiveListener = adapter;
