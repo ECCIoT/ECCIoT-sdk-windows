@@ -6,7 +6,7 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ECC_sdk_windows.Adapter.Args
+namespace ECC_sdk_windows.Manager.Args
 {
     /// <summary>
     /// ECC事件参数的基类

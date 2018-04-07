@@ -1,24 +1,38 @@
 ﻿using ECCIoT_sdk_windows;
 using System;
 using ECC_sdk_windows.Comm.Listener;
-using ECC_sdk_windows.Adapter.Args;
-using ECC_sdk_windows.Adapter.Function;
+using ECC_sdk_windows.Manager.Args;
+using ECC_sdk_windows.Manager.Function;
 using ECCIoT_sdk_windows.EccException;
 using System.Net.Sockets;
 
-namespace ECC_sdk_windows.Adapter
+namespace ECC_sdk_windows.Manager
 {
-    public class EccAdapter : IEccReceiptListener, IEccDataReceiveListener, IEccExceptionListener, IEccCmd
+    /// <summary>
+    /// ECC通信管理器
+    /// 管理EccSocket对象，将往来的通信数据转换为具体的命令和事件
+    /// </summary>
+    public class EccManager : IEccReceiptListener, IEccDataReceiveListener, IEccExceptionListener, IEccCmd
     {
-        /*EccEventAdapter回调接口*/
+        /*EccEvent回调接口*/
         private IEccEvevt eccEvevt;
+
+        /*IEccExceptionListener回调接口*/
+        private IEccExceptionListener eccExceptionListener;
 
         //ECCIoT示例
         public ECCIoT EcciotInstance { private get; set; }
 
-        public EccAdapter(IEccEvevt eccEvevt)
+        public EccManager(IEccEvevt eccEvevt)
         {
             this.eccEvevt = eccEvevt;
+
+        }
+
+        public EccManager(IEccEvevt eccEvevt, IEccExceptionListener eccExceptionListener)
+        {
+            this.eccEvevt = eccEvevt;
+            this.eccExceptionListener = eccExceptionListener;
         }
 
         /*操作回执回调接口*/
@@ -44,11 +58,21 @@ namespace ECC_sdk_windows.Adapter
         /*异常错误回调接口*/
         void IEccExceptionListener.Ecc_BreakOff(Exception ex)
         {
-            
+            if (eccExceptionListener != null)
+            {
+                eccExceptionListener.Ecc_BreakOff(ex);
+                return;
+            }
+            //code...
         }
         void IEccExceptionListener.Ecc_ConnectionFail(SocketException ex)
         {
-            
+            if (eccExceptionListener != null)
+            {
+                eccExceptionListener.Ecc_ConnectionFail(ex);
+                return;
+            }
+            //code...
         }
 
         /// <summary>

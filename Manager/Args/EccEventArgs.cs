@@ -5,8 +5,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ECC_sdk_windows.Adapter.Args
+namespace ECC_sdk_windows.Manager.Args
 {
+    /// <summary>
+    /// 询问APIKey的事件参数
+    /// </summary>
     public class CheckAPIKeyEventArgs : BaseEventArgs
     {
         public CheckAPIKeyEventArgs(string content)
@@ -14,6 +17,10 @@ namespace ECC_sdk_windows.Adapter.Args
 
         }
     }
+
+    /// <summary>
+    /// APIKey已验证的事件参数
+    /// </summary>
     public class APIKeyVerifiedEventArgs : BaseEventArgs
     {
         public APIKeyVerifiedEventArgs(string content)
@@ -21,6 +28,10 @@ namespace ECC_sdk_windows.Adapter.Args
 
         }
     }
+
+    /// <summary>
+    /// APIKey无效的事件参数
+    /// </summary>
     public class APIKeyInvalidEventArgs : BaseEventArgs
     {
         public APIKeyInvalidEventArgs(string content)

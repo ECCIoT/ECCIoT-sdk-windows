@@ -1,11 +1,11 @@
-﻿using ECC_sdk_windows.Adapter.Args;
+﻿using ECC_sdk_windows.Manager.Args;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ECC_sdk_windows.Adapter.Function
+namespace ECC_sdk_windows.Manager.Function
 {
     public interface IEccCmd
     {
@@ -22,9 +22,19 @@ namespace ECC_sdk_windows.Adapter.Function
         }
         */
 
-        //发送API_KEY
+        /// <summary>
+        /// 发送API_KEY
+        /// </summary>
+        /// <param name="args"></param>
+        /// <param name="successful"></param>
+        /// <param name="failure"></param>
         void EccCmd_CheckAPIKey(SendAPIKeyCmdArgs args, AsyncCallback successful, AsyncCallback failure);
-        //发送单个设备的控制命令
+        /// <summary>
+        /// 发送单个设备的控制命令
+        /// </summary>
+        /// <param name="args"></param>
+        /// <param name="successful"></param>
+        /// <param name="failure"></param>
         void EccCmd_ControlItem(ControlItemCmdArgs args, AsyncCallback successful, AsyncCallback failure);
     }
 }
