@@ -103,7 +103,7 @@ namespace ECC_sdk_windows.Manager
             }
         }
 
-        public void EccCmd_CheckAPIKey(SendAPIKeyCmdArgs args, AsyncCallback successful, AsyncCallback failure)
+        public void EccCmd_CheckAPIKey(CheckAPIKeyCmdArgs args, AsyncCallback successful, AsyncCallback failure)
         {
             CmdJson cmd = new CmdJson
             {

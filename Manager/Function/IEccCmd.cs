@@ -28,7 +28,7 @@ namespace ECC_sdk_windows.Manager.Function
         /// <param name="args"></param>
         /// <param name="successful"></param>
         /// <param name="failure"></param>
-        void EccCmd_CheckAPIKey(SendAPIKeyCmdArgs args, AsyncCallback successful, AsyncCallback failure);
+        void EccCmd_CheckAPIKey(CheckAPIKeyCmdArgs args, AsyncCallback successful, AsyncCallback failure);
         /// <summary>
         /// 发送单个设备的控制命令
         /// </summary>
