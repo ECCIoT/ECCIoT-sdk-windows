@@ -7,6 +7,7 @@ namespace ECC_sdk_windows.Manager.Args
     /// <summary>
     /// 询问APIKey的事件参数
     /// </summary>
+    [ArgsAttribute("RTC_AskIdentity")]
     public class AskIdentityArgs : BaseEventArgs
     {
         public string message;
@@ -22,6 +23,7 @@ namespace ECC_sdk_windows.Manager.Args
     /// <summary>
     /// APIKey已验证的事件参数
     /// </summary>
+    [ArgsAttribute("RTC_APIKeyVerified")]
     public class APIKeyVerifiedArgs : BaseEventArgs
     {
         public APIKeyVerifiedArgs(string content)
@@ -33,6 +35,7 @@ namespace ECC_sdk_windows.Manager.Args
     /// <summary>
     /// APIKey无效的事件参数
     /// </summary>
+    [ArgsAttribute("RTC_APIKeyInvalid")]
     public class APIKeyInvalidArgs : BaseEventArgs
     {
         public string message;
@@ -48,7 +51,7 @@ namespace ECC_sdk_windows.Manager.Args
     /// <summary>
     /// 更新项目集数据的事件参数
     /// </summary>
-    [ArgsAttribute("")]
+    [ArgsAttribute("Server_UpdateItemsData")]
     public class UpdateItemsDataArgs : BaseEventArgs
     {
         public new static string eventActionName = "";
@@ -90,6 +93,7 @@ namespace ECC_sdk_windows.Manager.Args
     /// <summary>
     /// 警报消息的事件参数
     /// </summary>
+    [ArgsAttribute("RTC_AskIdentity")]
     public class AlarmEventArgs : BaseEventArgs
     {
         public string itemID;
@@ -106,7 +110,7 @@ namespace ECC_sdk_windows.Manager.Args
             value = jo["value"].ToString();
         }
     }
-
+    
     [ArgsAttribute("RTC_CommunicationOutage")]
     public class CommunicationOutageArgs : BaseEventArgs
     {

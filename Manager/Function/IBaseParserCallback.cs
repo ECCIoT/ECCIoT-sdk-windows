@@ -7,32 +7,37 @@ using System.Threading.Tasks;
 
 namespace ECC_sdk_windows.Manager.Function
 {
-    public interface IEccEvevt
+    public interface IBaseEventParserCallback
     {
+        /*
         /// <summary>
         /// 询问API_KEY
         /// </summary>
         /// <param name="args"></param>
-        void EccEvent_CheckAPIKey(CheckAPIKeyEventArgs args);
+        void EccEvent_CheckAPIKey(AskIdentityArgs args);
         /// <summary>
         /// APIKey已通过验证
         /// </summary>
         /// <param name="args"></param>
-        void EccEvent_APIKeyVerified(APIKeyVerifiedEventArgs args);
+        void EccEvent_APIKeyVerified(APIKeyVerifiedArgs args);
         /// <summary>
         /// APIKey无效
         /// </summary>
         /// <param name="args"></param>
-        void EccEvent_APIKeyInvalid(APIKeyInvalidEventArgs args);
+        void EccEvent_APIKeyInvalid(APIKeyInvalidArgs args);
         /// <summary>
         /// 接收更新设备项的数据集
         /// </summary>
         /// <param name="args"></param>
-        void EccEvent_UpdateItemsData(UpdateItemsDataEventArgs args);
+        void EccEvent_UpdateItemsData(UpdateItemsDataArgs args);
         /// <summary>
         /// 接收紧急消息
         /// </summary>
         /// <param name="args"></param>
         void EccEvent_Alarm(AlarmEventArgs args);
+        */
+        void InvalidActionInstruction(String action, String content);
+
+
     }
 }
