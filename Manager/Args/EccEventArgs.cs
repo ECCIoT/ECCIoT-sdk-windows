@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json.Linq;
+﻿using ECC_sdk_windows.Manager.Utils;
+using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
 
 namespace ECC_sdk_windows.Manager.Args
@@ -6,20 +7,24 @@ namespace ECC_sdk_windows.Manager.Args
     /// <summary>
     /// 询问APIKey的事件参数
     /// </summary>
-    public class CheckAPIKeyEventArgs : BaseEventArgs
+    public class AskIdentityArgs : BaseEventArgs
     {
-        public CheckAPIKeyEventArgs(string content)
+        public string message;
+        public AskIdentityArgs(string content)
         {
-
+            //解析数据为Json对象
+            JObject jo = new JObject(content);
+            //获取数据
+            message = jo["message"].ToString();
         }
     }
 
     /// <summary>
     /// APIKey已验证的事件参数
     /// </summary>
-    public class APIKeyVerifiedEventArgs : BaseEventArgs
+    public class APIKeyVerifiedArgs : BaseEventArgs
     {
-        public APIKeyVerifiedEventArgs(string content)
+        public APIKeyVerifiedArgs(string content)
         {
 
         }
@@ -28,23 +33,28 @@ namespace ECC_sdk_windows.Manager.Args
     /// <summary>
     /// APIKey无效的事件参数
     /// </summary>
-    public class APIKeyInvalidEventArgs : BaseEventArgs
+    public class APIKeyInvalidArgs : BaseEventArgs
     {
-        public APIKeyInvalidEventArgs(string content)
+        public string message;
+        public APIKeyInvalidArgs(string content)
         {
-
+            //解析数据为Json对象
+            JObject jo = new JObject(content);
+            //获取数据
+            message = jo["message"].ToString();
         }
     }
 
     /// <summary>
     /// 更新项目集数据的事件参数
     /// </summary>
-    public class UpdateItemsDataEventArgs : BaseEventArgs
+    [ArgsAttribute("")]
+    public class UpdateItemsDataArgs : BaseEventArgs
     {
         public new static string eventActionName = "";
         public ItemData[] itemsData;
 
-        public UpdateItemsDataEventArgs(string content)
+        public UpdateItemsDataArgs(string content)
         {
             //解析数据为Json对象
             JObject jobj = new JObject(content);
@@ -53,7 +63,7 @@ namespace ECC_sdk_windows.Manager.Args
             //实例化数据集数组
             itemsData = new ItemData[jarr.Count];
             //遍历数据
-            for (int i=0;i<jarr.Count;i++)
+            for (int i = 0; i < jarr.Count; i++)
             {
                 //按序获取数组元素
                 JObject json = new JObject(jarr[i].ToString());
@@ -94,6 +104,19 @@ namespace ECC_sdk_windows.Manager.Args
             itemID = jo["itemID"].ToString();
             field = jo["field"].ToString();
             value = jo["value"].ToString();
+        }
+    }
+
+    [ArgsAttribute("RTC_CommunicationOutage")]
+    public class CommunicationOutageArgs : BaseEventArgs
+    {
+        string message;
+        public CommunicationOutageArgs(string content)
+        {
+            //解析数据为Json对象
+            JObject jo = new JObject(content);
+            //获取数据
+            message = jo["message"].ToString();
         }
     }
 }
