@@ -5,6 +5,9 @@ using ECC_sdk_windows.Manager.Args;
 using ECC_sdk_windows.Manager.Function;
 using ECCIoT_sdk_windows.EccException;
 using System.Net.Sockets;
+using ECC_sdk_windows.Utils;
+using System.Reflection;
+using ECC_sdk_windows.Manager.Utils;
 
 namespace ECC_sdk_windows.Manager
 {
@@ -12,27 +15,41 @@ namespace ECC_sdk_windows.Manager
     /// ECC通信管理器
     /// 管理EccSocket对象，将往来的通信数据转换为具体的命令和事件
     /// </summary>
-    public class EccManager : IEccReceiptListener, IEccDataReceiveListener, IEccExceptionListener, IEccCmd
+    public class EccManager : IEccReceiptListener, IEccDataReceiveListener, IEccExceptionListener, ITerminal2ServerEventCallback, IRtcCheckIdentityCallback
     {
         /*EccEvent回调接口*/
-        private IEccEvevt eccEvevt;
+        //private IBaseEventParserCallback eccEvevt;
+
+        /*命令内容解析器*/
+        public ContentParser Parser { get; set; }
 
         /*IEccExceptionListener回调接口*/
-        private IEccExceptionListener eccExceptionListener;
+        public IEccExceptionListener ExceptionListener { private get; set; }
 
         //ECCIoT示例
         public ECCIoT EcciotInstance { private get; set; }
 
-        public EccManager(IEccEvevt eccEvevt)
+        public EccManager(ContentParser parser)
         {
-            this.eccEvevt = eccEvevt;
-
+            Parser = parser;
         }
 
-        public EccManager(IEccEvevt eccEvevt, IEccExceptionListener eccExceptionListener)
+        public EccManager(IBaseEventParserCallback callback)
         {
-            this.eccEvevt = eccEvevt;
-            this.eccExceptionListener = eccExceptionListener;
+
+            Parser = new ContentParser(callback);
+        }
+
+        public EccManager(ContentParser parser, IEccExceptionListener eccExceptionListener)
+        {
+            Parser = parser;
+            this.ExceptionListener = eccExceptionListener;
+        }
+
+        public EccManager(IBaseEventParserCallback callback, IEccExceptionListener eccExceptionListener)
+        {
+            Parser = new ContentParser(callback);
+            this.ExceptionListener = eccExceptionListener;
         }
 
         /*操作回执回调接口*/
@@ -58,18 +75,20 @@ namespace ECC_sdk_windows.Manager
         /*异常错误回调接口*/
         void IEccExceptionListener.Ecc_BreakOff(Exception ex)
         {
-            if (eccExceptionListener != null)
+            if (ExceptionListener != null)
             {
-                eccExceptionListener.Ecc_BreakOff(ex);
+                ExceptionListener.Ecc_BreakOff(ex);
                 return;
             }
             //code...
         }
+
+
         void IEccExceptionListener.Ecc_ConnectionFail(SocketException ex)
         {
-            if (eccExceptionListener != null)
+            if (ExceptionListener != null)
             {
-                eccExceptionListener.Ecc_ConnectionFail(ex);
+                ExceptionListener.Ecc_ConnectionFail(ex);
                 return;
             }
             //code...
@@ -81,60 +100,71 @@ namespace ECC_sdk_windows.Manager
         /// <param name="eventJson"></param>
         private void ParsingCommands(EventJson eventJson)
         {
-            switch (eventJson.Action)
+            Parser.Parse(eventJson.action, eventJson.content);
+            /*
+            switch (eventJson.action)
             {
                 case "EccEvent_CheckAPIKey":
-                    eccEvevt.EccEvent_CheckAPIKey(new CheckAPIKeyEventArgs(eventJson.Content));
+                    eccEvevt.EccEvent_CheckAPIKey(new AskIdentityArgs(eventJson.content));
                     break;
                 case "EccEvent_APIKeyVerified":
-                    eccEvevt.EccEvent_APIKeyVerified(new APIKeyVerifiedEventArgs(eventJson.Content));
+                    eccEvevt.EccEvent_APIKeyVerified(new APIKeyVerifiedArgs(eventJson.content));
                     break;
                 case "EccEvent_APIKeyInvalid":
-                    eccEvevt.EccEvent_APIKeyInvalid(new APIKeyInvalidEventArgs(eventJson.Content));
+                    eccEvevt.EccEvent_APIKeyInvalid(new APIKeyInvalidArgs(eventJson.content));
                     break;
                 case "EccEvent_UpdateItemsData":
-                    eccEvevt.EccEvent_UpdateItemsData(new UpdateItemsDataEventArgs(eventJson.Content));
+                    eccEvevt.EccEvent_UpdateItemsData(new UpdateItemsDataArgs(eventJson.content));
                     break;
                 case "EccEvent_Alarm":
-                    eccEvevt.EccEvent_Alarm(new AlarmEventArgs(eventJson.Content));
+                    eccEvevt.EccEvent_Alarm(new AlarmEventArgs(eventJson.content));
                     break;
                 default:
                     throw new UnknownEventException();
             }
+            */
         }
 
-        public void EccCmd_CheckAPIKey(CheckAPIKeyCmdArgs args, AsyncCallback successful, AsyncCallback failure)
+        public void Send_Cmd(BaseCmdArgs args, AsyncCallback successful, AsyncCallback failure)
+        {
+            ArgsAttribute aa = args.GetType().GetCustomAttribute<ArgsAttribute>();
+
+            CmdJson cmd = new CmdJson
+            {
+                action = aa.Action,
+                content = args.ToString()
+            };
+            EcciotInstance.Send(cmd.ToString(), successful, failure);
+        }
+
+        void ITerminal2ServerEventCallback.Terminal_ControlDevice(ControlDeviceArgs args, AsyncCallback successful, AsyncCallback failure)
         {
             CmdJson cmd = new CmdJson
             {
-                Action = "EccCmd_CheckAPIKey",
-                Content = args.ToString()
+                action = "Terminal_ControlDevice",
+                content = args.ToString()
             };
-            EcciotInstance.Send(cmd.ToString(),successful, failure);
+            EcciotInstance.Send(cmd.ToString(), successful, failure);
         }
 
-        public void EccCmd_ControlItem(ControlItemCmdArgs args, AsyncCallback successful, AsyncCallback failure)
+        void ITerminal2ServerEventCallback.Terminal_BindDevice(BindDeviceArgs args, AsyncCallback successful, AsyncCallback failure)
         {
             CmdJson cmd = new CmdJson
             {
-                Action = "EccCmd_ControlItem",
-                Content = args.ToString()
+                action = "Terminal_BindDevice",
+                content = args.ToString()
             };
-            EcciotInstance.Send(cmd.ToString(),successful, failure);
+            EcciotInstance.Send(cmd.ToString(), successful, failure);
         }
 
-        
+        void IRtcCheckIdentityCallback.Terminal_CheckTerminalIdentity(CheckTerminalIdentityArgs args, AsyncCallback successful, AsyncCallback failure)
+        {
+            CmdJson cmd = new CmdJson
+            {
+                action = "Terminal_CheckTerminalIdentity",
+                content = args.ToString()
+            };
+            EcciotInstance.Send(cmd.ToString(), successful, failure);
+        }
     }
-
-    interface IEccEventAdapter
-    {
-
-    }
-
-
-
-
-
-    
-
 }
