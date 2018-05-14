@@ -1,4 +1,5 @@
-﻿    using System;
+﻿using ECC_sdk_windows.Manager.Utils;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -13,14 +14,27 @@ namespace ECC_sdk_windows.Manager.Args
      *  在Java端反序列化时无法正确的构造对象。
      */
 
-
-    public class CheckAPIKeyCmdArgs : BaseCmdArgs
+    [ArgsAttribute("Terminal_CheckTerminalIdentity")]
+    public class CheckTerminalIdentityArgs : BaseCmdArgs
     {
-        public string apiKey;
+        public string apikey;
+        public string token;
+        public string platform;
+        public string version;
     }
-    public class ControlItemCmdArgs : BaseCmdArgs
+
+    [ArgsAttribute("Terminal_BindDevice")]
+    public class BindDeviceArgs : BaseCmdArgs
     {
         public string itemID;
+        public string token;
+    }
+
+    [ArgsAttribute("Terminal_ControlDevice")]
+    public class ControlDeviceArgs : BaseCmdArgs
+    {
+        public string itemID;
+        public string token;
         public string atCmd;
     }
 }
